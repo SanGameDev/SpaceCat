@@ -172,9 +172,9 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 1
+  m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 2
   m_Material: {fileID: 6200000, guid: f919a522e6c015141b663a6b0d15d2ad, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -192,8 +192,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b83005646debcf46b44533c8ea2e039, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 5
+  jumpForce: 25
   movementSpeed: 5
+  groundTag: Ground
 --- !u!212 &543879027
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -356,9 +357,9 @@ GameObject:
   - component: {fileID: 1683673709}
   - component: {fileID: 1683673708}
   - component: {fileID: 1683673710}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Square
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -423,8 +424,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1683673707}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.5667, y: -1.732, z: 0}
-  m_LocalScale: {x: 14.0265, y: 1.8841, z: 1}
+  m_LocalPosition: {x: -1.154, y: -1.732, z: 0}
+  m_LocalScale: {x: 22.423601, y: 1.8841, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
