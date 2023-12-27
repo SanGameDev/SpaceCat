@@ -7,58 +7,69 @@ using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Movement")]
     public float jumpForce;
-    public float movementSpeed;
     public string groundTag;
-
     private Rigidbody2D rb;
-    private bool grounded;
+    [SerializeField] private bool grounded;
+    public float speed = 5.0f;
+    
+    [Header("Faux Gravity")]
+    public FauxGravityAttractor attractor;
+    private Transform myTransform;
 
+    [Header("Get Count Death")]
     private int CountDeath;
+    public int GetCountDeath { get { return CountDeath; } }
 
     private Vector2 checkPointPos;
-
-    public int GetCountDeath
-    {
-        get
-        {
-            return CountDeath;
-        }
-    }
     
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        grounded = false;
+        //grounded = false;
         checkPointPos = transform.position;
+        myTransform = transform;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        rb.AddForce(Input.GetAxis("Horizontal") * transform.right * movementSpeed);
-        
-        if (Input.GetAxis("Jump") == 1f && grounded)
+        float moveHorizontal = Input.GetAxis ("Horizontal");
+
+        Vector3 movement = new Vector3 (moveHorizontal, 0.0f, 0) * speed * Time.deltaTime;
+
+        transform.Translate(movement);
+
+        if (Input.GetAxis("Jump") > 0.5 && grounded)
         {
             StartCoroutine(JumpCoroutine());
+        }
+
+        if(attractor != null)
+        {
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.gravityScale = 0;
+            attractor.Attract(transform);  
+        }else
+        {
+            transform.rotation = new Quaternion(0, 0, 0, 0);
+            rb.gravityScale = 1;
         }
     }
 
     IEnumerator JumpCoroutine()
     {
-        rb.AddForce(transform.up * jumpForce);
-
-        yield return new WaitForSeconds(0.05f);
-
-        grounded = false;
-    }
-    
-    private void OnCollisionEnter2D(Collision2D col)
-    {
-        if (col.gameObject.CompareTag(groundTag))
+        if(attractor != null)
         {
-            grounded = true;
+            rb.AddForce(transform.up * jumpForce * 2);
+            yield return new WaitForSeconds(0.05f);
+            grounded = false;
+        }
+        else
+        {
+            rb.AddForce(transform.up * jumpForce);
+            yield return new WaitForSeconds(0.05f);
+            grounded = false;
         }
     }
     
@@ -69,14 +80,19 @@ public class PlayerMovement : MonoBehaviour
     }
 
     IEnumerator Respawn(float duration)
-    {
-        rb.velocity = new Vector2(0, 0);
-        rb.simulated = false;
-        transform.localScale = new Vector3(0, 0, 0);
+    { 
         yield return new WaitForSeconds(duration);
         transform.position = checkPointPos;
         transform.localScale = new Vector3(1, 1, 1);
         rb.simulated = true;
+    }
+
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag(groundTag))
+        {
+            grounded = true;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -88,6 +104,18 @@ public class PlayerMovement : MonoBehaviour
         if (other.CompareTag("Death"))
         {
             Death();
+        }
+        if (other.CompareTag("Planet"))
+        {
+            attractor = other.GetComponent<FauxGravityAttractor>();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Planet"))
+        {
+            attractor = null;
         }
     }
 }
