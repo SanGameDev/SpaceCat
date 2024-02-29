@@ -8,26 +8,36 @@ using UnityEngine.UIElements;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
-    public float jumpForce;
-    public string groundTag;
+    public float jumpForce = 45.0f;
+    public string groundTag = "Ground";
     private Rigidbody2D rb;
     [SerializeField] private bool grounded;
-    public float speed = 5.0f;
+    public float speed = 7.0f;
     
-    [Header("Faux Gravity")]
+
+    [Header("Gravity")]
     public FauxGravityAttractor attractor;
+    public ChangeGRavity changeGRavity;
+
+    [Space(10)]
+
     private Transform myTransform;
+    public float jumpForceMultiplier;
+
+    [Space(10)]
+
 
     [Header("Get Count Death")]
     private int CountDeath;
     public int GetCountDeath { get { return CountDeath; } }
-
     private Vector2 checkPointPos;
     
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        //grounded = false;
+        Camera cam = Camera.main;
+        cam.transform.AddComponent<FolowPlayer>();
         checkPointPos = transform.position;
         myTransform = transform;
     }
@@ -45,11 +55,35 @@ public class PlayerMovement : MonoBehaviour
             StartCoroutine(JumpCoroutine());
         }
 
+        GravityController();
+    }
+
+    private void FixedUpdate()
+    {
+        bool acelerated = false;
+        if(!grounded && !acelerated)
+        {
+            rb.AddForce(new Vector2(0, -8));
+            acelerated = true;
+        }
+        else
+        {
+            acelerated = false;
+        }
+    }
+
+    void GravityController()
+    {
         if(attractor != null)
         {
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             rb.gravityScale = 0;
-            attractor.Attract(transform);  
+            attractor.Attract(transform);
+        }else if(changeGRavity != null)
+        {
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.gravityScale = 0;
+            changeGRavity.GravityDirection(transform);
         }else
         {
             transform.rotation = new Quaternion(0, 0, 0, 0);
@@ -61,9 +95,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if(attractor != null)
         {
-            rb.AddForce(transform.up * jumpForce * 2);
+            rb.AddForce(transform.up * jumpForce * jumpForceMultiplier);
             yield return new WaitForSeconds(0.05f);
             grounded = false;
+            attractor = null;
         }
         else
         {
@@ -97,25 +132,28 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("CheckPoint"))
+        switch (other.tag)
         {
-            checkPointPos = other.transform.position;
-        }
-        if (other.CompareTag("Death"))
-        {
-            Death();
-        }
-        if (other.CompareTag("Planet"))
-        {
-            attractor = other.GetComponent<FauxGravityAttractor>();
+            case "Death":
+                Death();
+                break;
+            case "CheckPoint":
+                checkPointPos = other.transform.position;
+                break;
+            case "Planet":
+                attractor = other.GetComponent<FauxGravityAttractor>();
+                break;
+            case "Gravity":
+                changeGRavity = other.GetComponent<ChangeGRavity>();
+                break;
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Planet"))
+        if (other.CompareTag("Gravity"))
         {
-            attractor = null;
+            changeGRavity = null;
         }
     }
 }
