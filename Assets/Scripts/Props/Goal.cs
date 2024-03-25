@@ -13,11 +13,11 @@ public class Goal : MonoBehaviour
     private int Deaths;
     private int maxDeaths;
     public int level;
+
     void Start()
     {
-       
-            maxDeaths = PlayerPrefs.GetInt("deathsLevel" + level);
-        
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
+        maxDeaths = PlayerPrefs.GetInt("deathsLevel" + level);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

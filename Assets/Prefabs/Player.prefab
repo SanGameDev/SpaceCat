@@ -136,7 +136,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b83005646debcf46b44533c8ea2e039, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 10
-  movementSpeed: 2
+  jumpForce: 45
   groundTag: Ground
   grounded: 0
+  speed: 7
+  attractor: {fileID: 0}
+  changeGRavity: {fileID: 0}
+  jumpForceMultiplier: 0
