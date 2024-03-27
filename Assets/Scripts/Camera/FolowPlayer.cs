@@ -1,35 +1,71 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FolowPlayer : MonoBehaviour
 {
-    public Transform player;
-    public float xOffSet = 5f;
-    public float yOffSet = 3f;
-    public float speed = 0.3f;
+    //GameObject que será el objetivo de la camara, este será un objeto llamado Follow colocado en el player
+    public GameObject target;
+    //Guarda la posicion del target
+    Vector2 target_pos;
 
-    void Start() 
+    float posX;
+    float posY;
+
+    //Establecen los limites del movimiento de la camara hacia la izquierda o derecha
+    public float xRightLimit;
+    public float xLeftLimit;
+
+    //Establecen los limites del movimiento de la camara hacia arriba y abajo
+    public float yUpLimit;
+    public float yDownLimit;
+
+    //La velocidad a la que se mueve la camara
+    public float speed;
+    //Un booleano que permite el movimiento de la camara, en caso de que se requiera que se mueva de otra manera
+    public bool scriptOn = true;
+
+    void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;    
+        posX = target_pos.x + xLeftLimit;
+        posY = target_pos.y + yDownLimit;
+        transform.position = Vector3.Lerp(transform.position, new Vector3(posX, posY, -1), 1);
     }
 
-    void FixedUpdate()
+    private void Start()
     {
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePosition.x = Mathf.Clamp(mousePosition.x, player.position.x, player.position.x + xOffSet);
-        mousePosition.y = Mathf.Clamp(mousePosition.y, player.position.y, player.position.y + yOffSet);
+        Invoke("SearchPlayer", 0.1f);
+    }
+
+    void SearchPlayer()
+    {
+        target = GameObject.FindGameObjectWithTag("Player").transform.GetChild(0).gameObject;
+    }
+
+    void MoveCam()
+    {
+        if (!scriptOn)
+            return;
         
-        //make a dead zone for the camera in the middle of the screen
-        if (mousePosition.x < player.position.x + 1f && mousePosition.x > player.position.x - 1f)
+        target_pos.x = target.transform.position.x;
+        target_pos.y = target.transform.position.y;
+        //Condicionales que, cuando se cumplen, establecen la posicion a la que tiene que moverse la camara tanto en X como en Y
+        if (target_pos.x > xLeftLimit && target_pos.x < xRightLimit)
         {
-            mousePosition.x = player.position.x;
-        }
-        if (mousePosition.y < player.position.y + 1f && mousePosition.y > player.position.y - 1f)
-        {
-            mousePosition.y = player.position.y;
+            posX = target_pos.x;
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, new Vector3(mousePosition.x, mousePosition.y, -10f), speed);
+        if (target_pos.y > yDownLimit && target_pos.y < yUpLimit)
+        {
+            posY = target_pos.y;
+        }
+
+        transform.position = Vector3.Lerp(transform.position, new Vector3(posX, posY, -1), speed * Time.deltaTime);
+    }
+
+    void Update()
+    {
+        //Si target no tiene ningun objeto asignado, no se ejecuta MoveCam()
+        if (!target)
+            return;
+        MoveCam();
     }
 }
