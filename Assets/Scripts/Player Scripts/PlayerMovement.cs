@@ -38,11 +38,25 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        float moveHorizontal = Input.GetAxis ("Horizontal");
+        float moveHorizontal = Input.GetAxisRaw ("Horizontal");
 
-        Vector3 movement = new Vector3 (moveHorizontal, 0.0f, 0) * speed * Time.deltaTime;
+        if(moveHorizontal != 0)
+        {
+            transform.localScale = new Vector2(moveHorizontal, 1);
+            Vector3 movement;
+            if (attractor)
+            {
+                movement = new Vector3 (moveHorizontal, 0.0f, 0) * speed * Time.deltaTime;
 
-        transform.Translate(movement);
+                transform.Translate(movement);
+            }
+            else
+            {
+                movement = transform.right * speed * moveHorizontal;
+
+                rb.velocity = new Vector2(movement.x, rb.velocity.y);
+            }
+        }
 
         if (Input.GetAxis("Jump") > 0.5 && grounded)
         {
